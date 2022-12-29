@@ -12,7 +12,7 @@ list_of_addresses = [x for x in addresses.values]
 length = len(list_of_addresses)
 list_of_x_coords = []
 list_of_y_coords = []
-for i in range(10):
+for i in range(length):
     url = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=" + \
           list_of_addresses[i][1].replace(" ", "%20").replace("#", "%23").replace("'", "%27") + "%2C" + \
           list_of_addresses[i][2].replace(" ", "%") + "&benchmark=4"
@@ -28,20 +28,20 @@ for i in range(10):
     list_y = [str(i) for i in y_coord]
     for x_c in list_x:
         list_of_x_coords.append(float(x_c[6:15]))
-        print(list_of_x_coords)
-        to_csv = pd.DataFrame(list_of_x_coords)
-        to_csv.to_csv("Coordinates.csv")
-        list_of_x_coords.clear()
-
-    for y_c in list_y:
-        list_of_y_coords.append(float(y_c[6:16]))
-        # to_csv = pd.DataFrame(list_of_y_coords)
+        # to_csv = pd.DataFrame(list_of_x_coords)
         # to_csv.to_csv("Coordinates.csv")
-        # list_of_y_coords.clear()
+        for y_c in list_y:
+            list_of_y_coords.append(float(y_c[6:16]))
 
 
-# to_csv = pd.DataFrame(list_of_x_coords)
-# to_csv.to_csv("Coordinates.csv", index=False)
+
+Lat_and_long = {"X": list_of_x_coords, "Y": list_of_y_coords}
+print(Lat_and_long)
+to_csv = pd.DataFrame(Lat_and_long)
+to_csv.to_csv("Coordinates.csv")
+
+
+
 
 
 
