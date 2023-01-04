@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>341</width>
-    <height>277</height>
+    <width>354</width>
+    <height>280</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
      <string>Start Search</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="pushButton_1">
     <property name="geometry">
      <rect>
       <x>218</x>
@@ -105,7 +105,7 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Target Name and Address&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QTextEdit" name="textEdit_3">
+   <widget class="QTextEdit" name="textEdit_1">
     <property name="geometry">
      <rect>
       <x>43</x>
@@ -115,7 +115,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_2">
+   <widget class="QLineEdit" name="File_Name">
     <property name="geometry">
      <rect>
       <x>70</x>
@@ -135,7 +135,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_3">
+   <widget class="QLineEdit" name="lineEdit_2">
     <property name="geometry">
      <rect>
       <x>170</x>
@@ -165,7 +165,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>341</width>
+     <width>354</width>
      <height>22</height>
     </rect>
    </property>
@@ -173,10 +173,19 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="Open_file"/>
     <addaction name="actionClose"/>
    </widget>
    <addaction name="File"/>
   </widget>
+  <action name="Open_file">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
   <action name="actionClose">
    <property name="text">
     <string>Close</string>
