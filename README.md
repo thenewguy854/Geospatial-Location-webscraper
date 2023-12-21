@@ -18,7 +18,7 @@ outputting the name of the closest address to the entered coordinates </h3>
 
 * [x] Create GUI 
 * [x] Create backend functions 
-* [ ] Create ability to do multithreading for faster URL request
+* [X] Create way to get data from website in batch form
 * [ ] Fix progress bar on GUI
-* [ ] optimize final code
+* [x] optimize final code
 * [ ] Modernize GUI

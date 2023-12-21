@@ -1,93 +1,88 @@
 import pandas as pd
-from bs4 import BeautifulSoup as BS
-import requests, concurrent.futures
-from operator import add
-
+import requests
 
 
 class Geospatial_Location_Webscraper:
     def __init__(self):
         super(Geospatial_Location_Webscraper, self).__init__()
 
-    def URL_Generator (self, CSV_file):
-        url = []
-        addresses = pd.read_csv(CSV_file, delimiter=",")
-        list_of_addresses = [x for x in addresses.values]
+    def submit_batch_csv(self, input_csv_filename, output_csv_filename):
+        # The endpoint for batch geocoding
+        url = "https://geocoding.geo.census.gov/geocoder/locations/addressbatch"
+
+        # Open the CSV file and submit it to the geocoding service
+        with open(input_csv_filename, 'rb') as file:
+            # The 'files' parameter takes a dictionary with the form field name and the file object
+            files = {'addressFile': (input_csv_filename, file)}
+            # The 'payload' can include additional parameters such as benchmark and vintage
+            payload = {'benchmark': 'Public_AR_Census2020', 'vintage': 'Census2020_Census2020'}
+            response = requests.post(url, files=files, data=payload)
+
+        # Check if the request was successful
+        if response.status_code == 200:
+            # Write the response content to an output CSV file
+            with open(output_csv_filename, 'wb') as output_file:
+                output_file.write(response.content)
+            print(f"Results saved to {output_csv_filename}")
+        else:
+            print(f"Failed to retrieve results: {response.status_code}")
 
 
-        for i in range(len(list_of_addresses)):
-            url.append("https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=" + \
-                list_of_addresses[i][1].replace(" ", "%20").replace("#", "%23").replace("'", "%27") + "%2C" + \
-                list_of_addresses[i][2].replace(" ", "%20") + "&benchmark=4")
+    def process_geocoded_results(self, input_csv, output_csv):
+        # Read the CSV file, ensuring all data is read as string type
+        df = pd.read_csv(input_csv, header=None, dtype=str, quotechar='"')
 
-        return url, list_of_addresses
+        # Define a new DataFrame to hold processed data
+        processed_df = pd.DataFrame()
 
-    def web_crawler(self, url, Target_Lat, Target_Long):
+        def parse_coord(coord):
+            if pd.isna(coord) or coord.strip() == '':
+                return '00.00000000000000'
+            else:
+                return coord.strip()
 
-        self.userLat = Target_Lat
-        self.userLong = Target_Long
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Start a thread for each URL
-            future_to_url = {executor.submit(self.get_page, url[i], Target_Lat, Target_Long): url[i] for i in range(len(url))}
-            for future in concurrent.futures.as_completed(future_to_url):
-                i = url.index(future_to_url[future])
-                try:
-                    data = future.result()
-                except Exception as exc:
-                    print('%r generated an exception: %s' % (url[i], exc))
-                else:
-                    print('%r page is %d bytes' % (url[i], len(data)))
+        # Extract index, latitude, and longitude
+        processed_df['Index'] = df[0].astype(int)  # Convert index to integer for sorting
+        processed_df['Latitude'] = df[5].str.split(',', expand=True)[1].apply(parse_coord)
+        processed_df['Longitude'] = df[5].str.split(',', expand=True)[0].apply(parse_coord)
 
-    def get_page(self, url, Target_Lat, Target_Long, list_of_addresses):
+        # Sort the DataFrame by the index
+        processed_df.sort_values(by='Index', inplace=True)
 
-
-        list_of_x_coords = []
-        list_of_y_coords = []
-        diff_of_lat = []
-        diff_of_long = []
-
-        for i in range(20):
-            page = requests.get(url[i])
-            html_outlines = BS(page.content, "html.parser")
-            coordinate = html_outlines.find_all("span")
-            y_coord = coordinate[7:8]
-            x_coord = coordinate[8:9]
+        # Save the sorted and processed data to a new CSV file
+        processed_df.to_csv(output_csv, index=False, header=True)
 
 
-        #checks if data returned from website is valid if not replaces it with 99.99999999
-            if len(x_coord) == 0:
-                x_coord = ["<span>99.99999999999999</span>"]
-                y_coord = ["<span>99.99999999999999</span>"]
-            list_x = [str(i) for i in x_coord]
-            list_y = [str(i) for i in y_coord]
+    def calculate_closest_address_to_target(self, geocoded_csv, addresses_csv, TargetLat, TargetLong):
+        # Read the sorted geocoded results and addresses
+        geocoded_df = pd.read_csv(geocoded_csv)
+        addresses_df = pd.read_csv(addresses_csv, header=None, names=['Name', 'Address', 'City'])
 
-        #converts all the data from a website string into a float and stores in a list
-            for x_c in list_x:
-                list_of_x_coords.append(float(x_c[6:15]))
-                diff_of_lat.append(Target_Lat - float(x_c[6:15]))
-            for y_c in list_y:
-                list_of_y_coords.append(float(y_c[6:16]))
-                diff_of_long.append(Target_Long - float(y_c[6:16]))
+        # Calculate the distance to the target for each coordinate
+        geocoded_df['Distance'] = ((geocoded_df['Latitude'] - TargetLat) ** 2 + (geocoded_df['Longitude'] - TargetLong) ** 2) ** 0.5
 
+        # Find the index of the closest address
+        closest_index = geocoded_df['Distance'].idxmin()
+        closest_geocoded_index = geocoded_df.loc[closest_index, 'Index']
 
-        # calculates the closest lat and long to the target lat and long
-        res1 = list(map(abs, diff_of_lat))
-        res2 = list(map(abs, diff_of_long))
-        res3 = list(map(add, res1, res2))
-        res3.index(min(res3))
-        index3 = res3.index(min(res3))
+        # Find the corresponding address in addresses_df
+        closest_address = addresses_df.iloc[closest_geocoded_index - 1]  # assuming the CSV index starts from 1
+
+        # Return the closest address details
+        return closest_address
+
+scraper = Geospatial_Location_Webscraper()
+
+# Step 1: Submit batch of addresses for geocoding
+scraper.submit_batch_csv('batch submitted addresses.csv', 'geocoded_addresses_results.csv')
+
+# Step 2: Process the geocoded results
+scraper.process_geocoded_results('geocoded_addresses_results.csv', 'sorted_geocoded_addresses.csv')
+
+# Step 3: Calculate the closest address
+closest_address = scraper.calculate_closest_address_to_target('sorted_geocoded_addresses.csv', 'addresses.csv', 37.065984, -79.601172)
+print(f"Closest address: {closest_address}")
 
 
 
-        # #creates a CSV file with all the x and y of the addresses given in CSV then returns desired target
-        Lat_and_long = {"X": list_of_x_coords, "Y": list_of_y_coords}
-        to_csv = pd.DataFrame(Lat_and_long)
-        to_csv.to_csv("Coordinates.csv")
-        return list_of_addresses[index3][:]
-
-
-
-
-# webscraper = Geospatial_Location_Webscraper()
-# urls, addresses = webscraper.URL_Generator('addresses.csv')
-# webscraper.get_page(urls, 37.065984, -79.601172, addresses)
+# optimized from 23:43 down to 18 seconds
