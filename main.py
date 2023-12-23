@@ -1,12 +1,16 @@
 import pandas as pd
 import requests
-
+import os
 
 class Geospatial_Location_Webscraper:
     def __init__(self):
         super(Geospatial_Location_Webscraper, self).__init__()
 
     def submit_batch_csv(self, input_csv_filename, output_csv_filename):
+        # Ensure the output file exists, create it if not
+        if not os.path.exists(output_csv_filename):
+            open(output_csv_filename, 'wb').close()
+
         # The endpoint for batch geocoding
         url = "https://geocoding.geo.census.gov/geocoder/locations/addressbatch"
 
@@ -20,12 +24,9 @@ class Geospatial_Location_Webscraper:
 
         # Check if the request was successful
         if response.status_code == 200:
-            # Write the response content to an output CSV file
+            # Write the response content to the output CSV file
             with open(output_csv_filename, 'wb') as output_file:
                 output_file.write(response.content)
-            print(f"Results saved to {output_csv_filename}")
-        else:
-            print(f"Failed to retrieve results: {response.status_code}")
 
 
     def process_geocoded_results(self, input_csv, output_csv):
@@ -71,17 +72,6 @@ class Geospatial_Location_Webscraper:
         # Return the closest address details
         return closest_address
 
-scraper = Geospatial_Location_Webscraper()
-
-# Step 1: Submit batch of addresses for geocoding
-scraper.submit_batch_csv('batch submitted addresses.csv', 'geocoded_addresses_results.csv')
-
-# Step 2: Process the geocoded results
-scraper.process_geocoded_results('geocoded_addresses_results.csv', 'sorted_geocoded_addresses.csv')
-
-# Step 3: Calculate the closest address
-closest_address = scraper.calculate_closest_address_to_target('sorted_geocoded_addresses.csv', 'addresses.csv', 37.065984, -79.601172)
-print(f"Closest address: {closest_address}")
 
 
 

@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Geospcatial_Location_Webscraper</class>
- <widget class="QMainWindow" name="Geospcatial_Location_Webscraper">
+ <class>Geospatial_Location_Webscraper</class>
+ <widget class="QMainWindow" name="Geospatial_Location_Webscraper">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>354</width>
-    <height>280</height>
+    <width>353</width>
+    <height>353</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Geospatial Location Web scraper</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>41</x>
-      <y>199</y>
+      <x>40</x>
+      <y>240</y>
       <width>91</width>
       <height>21</height>
      </rect>
@@ -33,11 +33,14 @@
    <widget class="QPushButton" name="pushButton_1">
     <property name="geometry">
      <rect>
-      <x>218</x>
-      <y>198</y>
+      <x>220</x>
+      <y>240</y>
       <width>75</width>
       <height>23</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>Click to stop the program </string>
     </property>
     <property name="text">
      <string>Cancel</string>
@@ -46,8 +49,8 @@
    <widget class="QProgressBar" name="progressBar">
     <property name="geometry">
      <rect>
-      <x>42</x>
-      <y>168</y>
+      <x>40</x>
+      <y>210</y>
       <width>251</width>
       <height>23</height>
      </rect>
@@ -114,7 +117,7 @@
       <x>43</x>
       <y>129</y>
       <width>251</width>
-      <height>31</height>
+      <height>71</height>
      </rect>
     </property>
     <property name="toolTip">
@@ -183,7 +186,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>354</width>
+     <width>353</width>
      <height>22</height>
     </rect>
    </property>
@@ -197,9 +200,6 @@
    <addaction name="File"/>
   </widget>
   <action name="Open_file">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
    <property name="text">
     <string>Open</string>
    </property>
